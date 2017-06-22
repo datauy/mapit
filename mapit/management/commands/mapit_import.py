@@ -44,6 +44,12 @@ class Command(LabelCommand):
             help='Which country should be used',
         )
         parser.add_argument(
+            '--parent_area',
+            action="store",
+            dest='parent_area',
+            help='Which parent_area should be used',
+        )
+        parser.add_argument(
             '--area_type_code',
             action="store",
             dest='area_type_code',
@@ -136,6 +142,7 @@ class Command(LabelCommand):
 
         generation_id = options['generation_id']
         area_type_code = options['area_type_code']
+        parent_area = options['parent_area']
         name_type_code = options['name_type_code']
         country_code = options['country_code']
         override_name = options['override_name']
@@ -179,7 +186,12 @@ class Command(LabelCommand):
             country = Country(code=country_code, name=country_name)
             if options['commit']:
                 country.save()
-
+        if parent_area:
+            try:
+                parent = Area.objects.get(id=parent_area)
+            except:
+                raise CommandError(
+                    'ERROR EN PARENT: %s' % parent_area)
         if code_type_code:
             try:
                 code_type = CodeType.objects.get(code=code_type_code)
@@ -317,7 +329,7 @@ class Command(LabelCommand):
                     name=name,
                     type=area_type,
                     country=country,
-                    # parent_area=parent_area,
+                    parent_area=parent,
                     generation_low=new_generation,
                     generation_high=new_generation,
                 )
